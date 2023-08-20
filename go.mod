@@ -1,4 +1,4 @@
-module anarchymonkey/url-shortner
+module github.com/anarchymonkey/url-shortner
 
 go 1.20
 
