@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/anarchymonkey/url-shortner/globals"
@@ -10,15 +9,13 @@ import (
 )
 
 func main() {
-	fmt.Println("This is the URL shortner")
-
 	router := gin.Default()
 
 	router.Use(corsMiddleWare())
 
-	router.POST("/", handlers.HomeRouteHandler)
+	router.POST("/generate-short-url", handlers.GenerateShortURL)
 
-	router.Run(":8080")
+	router.Run(globals.SERVER_PORT)
 }
 
 func corsMiddleWare() gin.HandlerFunc {
