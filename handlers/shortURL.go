@@ -102,10 +102,45 @@ func GenerateShortURL(g *gin.Context, db *gorm.DB) {
 
 	// creation handled gracefully
 	rows := db.Create(&shortUrlInsert)
+	fmt.Println("The error is", rows.Error)
+	if rows.RowsAffected == 0 {
+		shortenedUrls := ShortenedUrls{}
+		db.First(&shortenedUrls, "longurl = ?", shortUrlInsert.Longurl)
+		g.IndentedJSON(http.StatusOK, gin.H{
+			"message": fmt.Sprintf("your generated short url is: %s", shortenedUrls.Shorturl),
+		})
+		return
+	}
 
 	fmt.Println(requestBody.LongURL, rows.RowsAffected)
 
 	g.IndentedJSON(http.StatusOK, gin.H{
-		"message": fmt.Sprintf("successfully hit with title: %s", requestBody.LongURL),
+		"message": fmt.Sprintf("your generated short url is: %s", shortUrlInsert.Shorturl),
 	})
+}
+
+func GetLongURLFromShortURL(g *gin.Context, db *gorm.DB) {
+	params, ok := g.Params.Get("shorturl")
+
+	if !ok {
+		g.IndentedJSON(http.StatusBadRequest, gin.H{
+			"message": "query param not found, require short url",
+		})
+		return
+	}
+
+	fmt.Println("the params is", params)
+	shortUrlResp := ShortenedUrls{}
+
+	db.First(&shortUrlResp, "shorturl = ?", params)
+
+	fmt.Println(shortUrlResp.Shorturl, shortUrlResp.Longurl, db.RowsAffected, db.Error)
+	if db.Error != nil {
+		g.IndentedJSON(http.StatusOK, gin.H{
+			"message": "long url not found or expired",
+		})
+		return
+	}
+
+	g.Redirect(http.StatusTemporaryRedirect, shortUrlResp.Longurl)
 }

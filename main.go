@@ -52,6 +52,7 @@ func main() {
 	}
 
 	router.POST("/generate-short-url", handlerWrapper(handlers.GenerateShortURL, env))
+	router.GET("/get/:shorturl", handlerWrapper(handlers.GetLongURLFromShortURL, env))
 
 	router.Run(globals.SERVER_PORT)
 }
